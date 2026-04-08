@@ -1,0 +1,22 @@
+# Conexión a un destino "local" — el engine escribe a un path del filesystem
+# que el operador monta en el Pod.
+#
+# Útil para:
+#   - Tests sin configurar credenciales de nube.
+#   - Air-gapped: el destino es un PVC NFS o un disco compartido.
+#
+# IMPORTANTE: el path debe existir DENTRO del Pod del engine. Hoy esto requiere
+# que vos, en una versión futura del operador, le digas qué PVC mountear como
+# destino. Para el flujo K8s puro lo más útil es S3/Azure/GCS/SFTP.
+#
+# `local` no requiere `credentialsSecretRef`.
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarConnection
+metadata:
+  name: nfs-archive
+  namespace: scutar
+spec:
+  type: local
+  local:
+    path: /mnt/archive/scutar-repo

@@ -1,0 +1,36 @@
+# Paso 7 (opcional): Restore del snapshot creado en el paso 6.
+#
+# Antes de aplicar:
+#   1. Mirá los ScutarSnapshot creados por el paso anterior:
+#        kubectl -n backups get scutarsnapshots
+#   2. Copiá el nombre de uno de ellos al campo `snapshotRef.name` de abajo.
+#
+# El operador creará un PVC nuevo (`app-data-restored`) y un Job que monta
+# el PVC en /data y corre `scutar-runner --restore <id> --target /data`.
+#
+# NOTA: el reconciler de ScutarRestoreRequest está pendiente en el operador
+# (Agent.md §7). Este YAML es el contrato final; cuando esté wired, va a
+# funcionar tal cual. Mientras tanto, podés correr el restore a mano desde
+# fuera del cluster con `scutar-runner --spec ... --restore <id> --target <dir>`.
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: app-data-restored
+  namespace: scutar
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarRestoreRequest
+metadata:
+  name: walkthrough-restore
+  namespace: scutar
+spec:
+  snapshotRef:
+    name: walkthrough-snapshot-<TIMESTAMP>     # ← reemplazar
+  targetPvcName: app-data-restored
+  targetPath: /data

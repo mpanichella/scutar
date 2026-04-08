@@ -1,0 +1,30 @@
+# Default values for the scutar-operator chart.
+
+operator:
+  image:
+    repository: addlayer/scutar-operator
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 1
+  watchNamespace: ""           # empty = watch all namespaces
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+engine:
+  image:
+    repository: addlayer/scutar-runner
+    tag: latest
+    pullPolicy: IfNotPresent
+  serviceAccount: scutar-runner
+
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+  name: scutar-operator

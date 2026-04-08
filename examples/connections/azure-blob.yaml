@@ -1,0 +1,34 @@
+# Conexión a Azure Blob Storage.
+#
+# Reemplazar:
+#   - <STORAGE_ACCOUNT>  cuenta de almacenamiento (ej. mystorageacct)
+#   - <CONTAINER>        contenedor existente dentro de la cuenta
+#   - <STORAGE_KEY>      una de las dos access keys de la cuenta
+#
+# Alternativa: en lugar de AZURE_STORAGE_KEY podés usar un SAS token
+# poniendo `AZURE_STORAGE_SAS_TOKEN: "?sv=...&sig=..."`. El engine prefiere
+# la access key si las dos están presentes.
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: prod-azure-creds
+  namespace: scutar
+type: Opaque
+stringData:
+  AZURE_STORAGE_ACCOUNT: "<STORAGE_ACCOUNT>"
+  AZURE_STORAGE_KEY: "<STORAGE_KEY>"
+  # AZURE_STORAGE_SAS_TOKEN: ""
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarConnection
+metadata:
+  name: prod-azure
+  namespace: scutar
+spec:
+  type: azure
+  azure:
+    account: <STORAGE_ACCOUNT>
+    container: <CONTAINER>
+  credentialsSecretRef:
+    name: prod-azure-creds

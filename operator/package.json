@@ -1,0 +1,31 @@
+{
+  "name": "@scutar/operator",
+  "version": "1.0.0",
+  "description": "Scutar: Kubernetes operator for backups and sync (ScutarBackup CRD)",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "start": "node dist/index.js",
+    "debug": "npm run build && node --enable-source-maps dist/index.js",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@kubernetes/client-node": "^0.20.0",
+    "dotenv": "^16.3.1",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.44.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.1.6"
+  }
+}

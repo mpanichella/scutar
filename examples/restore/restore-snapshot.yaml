@@ -1,0 +1,47 @@
+# Restaurar un snapshot a un PVC nuevo.
+#
+# Cómo funciona:
+#   1. Antes de aplicar este CR, creá el PVC destino (`postgres-data-restore`).
+#      Tiene que existir y ser del tamaño suficiente.
+#   2. Aplicá este ScutarRestoreRequest.
+#   3. El operador creará un Job que monta:
+#        - el PVC destino en /data
+#        - las credenciales del ScutarConnection original (vía
+#          ScutarSnapshot.status.backupRef)
+#        - el password de encriptación si el snapshot estaba encriptado
+#      y corre `scutar-runner --restore <snapshot-id> --target /data`.
+#   4. Cuando el Job termina, el PVC tiene el contenido del snapshot.
+#
+# `spec.snapshotRef.name` apunta a un ScutarSnapshot existente. Para listar:
+#
+#   kubectl get scutarsnapshots -n backups
+#
+# Cada vez que un backup snapshot termina, el operador crea uno nuevo con el
+# nombre `<backup-name>-<timestamp>` (ver Agent.md §4.3).
+#
+# NOTA: el reconciler de ScutarRestoreRequest en el operador todavía está
+# pendiente (Agent.md §7). Este YAML es el contrato final; cuando el
+# reconciler esté wired up, vas a poder aplicarlo tal cual.
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data-restore
+  namespace: scutar
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 50Gi
+  # storageClassName: gp3                # ajustar a tu cluster
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarRestoreRequest
+metadata:
+  name: restore-postgres-20260408
+  namespace: scutar
+spec:
+  snapshotRef:
+    name: postgres-daily-20260408-020001  # nombre del ScutarSnapshot a restaurar
+  targetPvcName: postgres-data-restore
+  targetPath: /data

@@ -1,0 +1,43 @@
+# Conexión a Google Cloud Storage.
+#
+# Las credenciales son un service account JSON: en GCP creá un service account
+# con rol "Storage Object Admin" sobre el bucket destino, descargá la key JSON
+# y pegala TAL CUAL en `service-account.json` abajo (es un único campo
+# multilínea).
+#
+# El engine recibe el path al archivo via la env var
+# GOOGLE_APPLICATION_CREDENTIALS, que el operador setea automáticamente a
+# /etc/scutar/creds/service-account.json.
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: prod-gcs-creds
+  namespace: scutar
+type: Opaque
+stringData:
+  service-account.json: |
+    {
+      "type": "service_account",
+      "project_id": "<GCP_PROJECT>",
+      "private_key_id": "...",
+      "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
+      "client_email": "scutar-backup@<GCP_PROJECT>.iam.gserviceaccount.com",
+      "client_id": "...",
+      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+      "token_uri": "https://oauth2.googleapis.com/token",
+      "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+      "client_x509_cert_url": "..."
+    }
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarConnection
+metadata:
+  name: prod-gcs
+  namespace: scutar
+spec:
+  type: gcs
+  gcs:
+    bucket: my-backups-bucket
+  credentialsSecretRef:
+    name: prod-gcs-creds

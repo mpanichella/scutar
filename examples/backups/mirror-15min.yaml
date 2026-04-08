@@ -1,0 +1,35 @@
+# Mirror mode: réplica 1:1 contra una nube cada 15 minutos.
+#
+# Diferencia clave con `mode: snapshot`:
+#   - NO hay historia. Solo el último estado del volumen está en la nube.
+#   - NO hay dedup. Cada archivo viaja como un objeto.
+#   - NO hay encriptación.
+#   - SÍ borra del destino los archivos que no existan localmente.
+#
+# Útil para:
+#   - Mirror de assets de un CDN, contenido estático, archivos generados.
+#   - Replicación cross-region de un volumen.
+#   - Cuando el destino es leído por OTRO proceso (no por Scutar).
+#
+# El cache de hashes vive en `.scutar-mirror-state.json` en la raíz del prefix.
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarBackup
+metadata:
+  name: cdn-assets-mirror
+  namespace: scutar
+spec:
+  mode: mirror
+  schedule: "*/15 * * * *"            # cada 15 minutos
+  source:
+    pvcName: cdn-assets
+    path: /data
+    exclude:
+      - "tmp/**"
+      - "*.swp"
+  destinationConnectionRef:
+    name: prod-s3
+  destinationPath: cdn-mirror/
+  jobTemplate:
+    activeDeadlineSeconds: 600         # 10 minutos máximo
+    ttlSecondsAfterFinished: 3600

@@ -1,0 +1,29 @@
+{
+  "name": "scutar",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scutar — backup, sync and restore platform for Kubernetes (Rust engine + Node.js operator)",
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "build:operator": "npm run build -w @scutar/operator",
+    "build:ui": "npm run build -w ui",
+    "start:operator": "npm run start -w @scutar/operator",
+    "start:api": "npm run start -w @scutar/api",
+    "start:server": "npm run build:ui && npm run build -w @scutar/api && npm run start -w @scutar/api",
+    "dev:api": "npm run dev -w @scutar/api",
+    "dev:ui": "npm run dev -w ui",
+    "dev:all": "npm run build:operator && npm run build -w @scutar/api && concurrently -n operator,api,ui -c blue,green,magenta \"npm run start:operator\" \"npm run start:api\" \"npm run dev:ui\"",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3"
+  },
+  "workspaces": [
+    "operator",
+    "server/backend",
+    "server/ui"
+  ],
+  "author": "",
+  "license": "Apache-2.0"
+}

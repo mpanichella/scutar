@@ -1,0 +1,33 @@
+[package]
+name = "scutar-backends"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Storage backend implementations for Scutar (S3, Azure Blob, GCS, SFTP)"
+
+[dependencies]
+scutar-core.workspace = true
+async-trait.workspace = true
+async-stream.workspace = true
+bytes.workspace = true
+futures.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+
+# Cloud SDKs — wired per backend module. Each module is the *only* place
+# in the codebase that touches its respective SDK; the rest of the engine
+# only sees the `StorageBackend` trait from `scutar-core`.
+aws-config.workspace = true
+aws-sdk-s3.workspace = true
+azure_core.workspace = true
+azure_identity.workspace = true
+azure_storage.workspace = true
+azure_storage_blobs.workspace = true
+google-cloud-storage.workspace = true
+russh.workspace = true
+russh-sftp.workspace = true

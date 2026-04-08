@@ -1,0 +1,34 @@
+# Conexión a un S3 compatible (MinIO, Wasabi, DigitalOcean Spaces, ...).
+#
+# Diferencia clave con AWS S3:
+#   - spec.s3.endpoint apunta al cluster MinIO (no a *.amazonaws.com)
+#   - spec.s3.forcePathStyle: true es OBLIGATORIO para MinIO
+#     (los buckets se direccionan como http://host/bucket en lugar de
+#      http://bucket.host)
+#
+# Útil para tests locales o on-prem.
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-creds
+  namespace: scutar
+type: Opaque
+stringData:
+  AWS_ACCESS_KEY_ID: "minio"
+  AWS_SECRET_ACCESS_KEY: "minio123"
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarConnection
+metadata:
+  name: minio
+  namespace: scutar
+spec:
+  type: s3
+  s3:
+    bucket: scutar-test
+    region: us-east-1                            # MinIO ignora region; cualquiera vale
+    endpoint: http://minio.minio.svc:9000        # ajustar al host real del MinIO
+    forcePathStyle: true
+  credentialsSecretRef:
+    name: minio-creds

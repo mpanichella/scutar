@@ -1,0 +1,51 @@
+# Paso 4: PVC origen — el volumen que querés backupear.
+#
+# Este YAML asume que NO existe todavía y lo crea con un PV demo. En un
+# cluster real probablemente este PVC ya existe (lo usa tu app) y este paso
+# se saltea.
+#
+# Para hacer un test rápido, este YAML levanta también un Job que escribe
+# datos de muestra en el PVC, así el primer backup tiene algo que copiar.
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: app-data
+  namespace: scutar
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+  # storageClassName: gp3              # ajustar a tu cluster (sino usa el default)
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: seed-app-data
+  namespace: scutar
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: seed
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              mkdir -p /data/sub
+              echo "hola desde scutar walkthrough $(date -u +%FT%TZ)" > /data/file1.txt
+              echo "archivo dos" > /data/file2.txt
+              echo "subdirectorio" > /data/sub/file3.txt
+              dd if=/dev/urandom of=/data/random.bin bs=1M count=2 2>/dev/null
+              ls -la /data
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: app-data

@@ -1,0 +1,17 @@
+# Paso 3: ScutarConnection — define el destino del backup.
+#
+# Solo coordenadas de la nube + ref al Secret del paso 2. Sin lógica.
+# Reemplazar <BUCKET> y <REGION> antes de aplicar.
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarConnection
+metadata:
+  name: prod-s3
+  namespace: scutar
+spec:
+  type: s3
+  s3:
+    bucket: <BUCKET>
+    region: <REGION>
+  credentialsSecretRef:
+    name: prod-s3-creds

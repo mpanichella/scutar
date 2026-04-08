@@ -1,0 +1,59 @@
+# Backup snapshot diario, encriptado, con retención.
+#
+# Caso típico: backup nocturno de la base de datos. Cada corrida es
+# incremental gracias al dedup content-addressable: solo los chunks nuevos
+# viajan a la nube. La retención mantiene las últimas 7 corridas diarias,
+# 4 semanales y 12 mensuales — el resto se prunea automáticamente.
+#
+# Requisitos previos:
+#   - PVC `postgres-data` en el namespace `scutar`
+#   - ScutarConnection `prod-s3` (ver examples/connections/s3-aws.yaml)
+#   - Secret `postgres-backup-password` con un password fuerte
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-backup-password
+  namespace: scutar
+type: Opaque
+stringData:
+  password: "<elegir-un-password-largo-y-aleatorio>"
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarBackup
+metadata:
+  name: postgres-daily
+  namespace: scutar
+spec:
+  mode: snapshot
+  schedule: "0 2 * * *"               # todos los días a las 02:00 UTC
+  source:
+    pvcName: postgres-data
+    path: /data
+    exclude:
+      - "*.tmp"
+      - "*.log"
+      - "pg_wal/**"                   # excluir WAL en caliente
+  destinationConnectionRef:
+    name: prod-s3
+  destinationPath: postgres/          # prefijo dentro del bucket
+  encryption:
+    enabled: true
+    passwordSecretRef:
+      name: postgres-backup-password
+      key: password
+  retention:
+    keepDaily: 7
+    keepWeekly: 4
+    keepMonthly: 12
+  jobTemplate:
+    backoffLimit: 1
+    activeDeadlineSeconds: 7200       # corta el Job si pasa de 2h
+    ttlSecondsAfterFinished: 604800   # mantener el Job 7 días tras terminar
+    resources:
+      requests:
+        cpu: "200m"
+        memory: "512Mi"
+      limits:
+        cpu: "2"
+        memory: "2Gi"

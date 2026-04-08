@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-operator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: scutar-operator
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.operator.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: scutar-operator
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: scutar-operator
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: operator
+          image: "{{ .Values.operator.image.repository }}:{{ .Values.operator.image.tag }}"
+          imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
+          env:
+            - name: SCUTAR_WATCH_NAMESPACE
+              value: {{ .Values.operator.watchNamespace | quote }}
+            - name: SCUTAR_ENGINE_IMAGE
+              value: "{{ .Values.engine.image.repository }}:{{ .Values.engine.image.tag }}"
+            - name: SCUTAR_ENGINE_IMAGE_PULL_POLICY
+              value: {{ .Values.engine.image.pullPolicy }}
+            - name: SCUTAR_ENGINE_SERVICE_ACCOUNT
+              value: {{ .Values.engine.serviceAccount }}
+          resources:
+            {{- toYaml .Values.operator.resources | nindent 12 }}

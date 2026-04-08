@@ -1,0 +1,22 @@
+# Backup snapshot de una sola corrida (sin schedule).
+#
+# Cuando NO definís `spec.schedule`, el operador crea un Job inmediato en
+# lugar de un CronJob. Útil para:
+#   - Backups manuales pre-deploy / pre-migration.
+#   - Tomar un snapshot puntual antes de un cambio riesgoso.
+#
+# Sin encriptación, sin retención (no hace falta — son one-shot).
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarBackup
+metadata:
+  name: pre-deploy-snapshot
+  namespace: scutar
+spec:
+  mode: snapshot
+  source:
+    pvcName: app-data
+    path: /data
+  destinationConnectionRef:
+    name: prod-s3
+  destinationPath: pre-deploy/

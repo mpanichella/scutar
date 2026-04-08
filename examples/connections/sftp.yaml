@@ -1,0 +1,45 @@
+# Conexión a un servidor SFTP por SSH.
+#
+# El engine soporta dos métodos de autenticación, en orden de preferencia:
+#
+#   1. Llave privada (recomendado). Pegá la llave SSH en el campo `id_ed25519`
+#      o `id_rsa` del Secret. Si la llave está cifrada, agregá la passphrase
+#      en el campo `passphrase`.
+#
+#   2. Password. Pegá el password en el campo `password` del Secret.
+#
+# Solo necesitás uno de los dos. La llave privada se busca primero.
+#
+# IMPORTANTE: hoy el handler SSH del engine acepta cualquier host key. Antes
+# de productivo conviene pinear el known_hosts (TODO en sftp/mod.rs).
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: prod-sftp-creds
+  namespace: scutar
+type: Opaque
+stringData:
+  # ---- opción A: llave privada ----
+  id_ed25519: |
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    ...pegar aquí la llave privada completa...
+    -----END OPENSSH PRIVATE KEY-----
+  # passphrase: "opcional, solo si la llave está cifrada"
+
+  # ---- opción B: password (descomentar si no usás llave) ----
+  # password: "supersecreto"
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarConnection
+metadata:
+  name: prod-sftp
+  namespace: scutar
+spec:
+  type: sftp
+  sftp:
+    host: backup-server.example.com
+    port: 22
+    user: scutar-backup
+  credentialsSecretRef:
+    name: prod-sftp-creds

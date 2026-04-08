@@ -1,0 +1,10 @@
+# Paso 1: Namespace donde van a vivir los CRDs y los Jobs.
+#
+# Por convención todo Scutar (operator, CRDs, backups, secrets) vive en el
+# namespace `scutar`. Si querés usar otro, reemplazalo en este archivo y en
+# todos los siguientes pasos del walkthrough.
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: scutar

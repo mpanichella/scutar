@@ -1,0 +1,71 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/scutar-core",
+    "crates/scutar-backends",
+    "crates/scutar-engine",
+    "crates/scutar-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.78"
+license = "Apache-2.0"
+authors = ["Scutar contributors"]
+repository = "https://github.com/addlayer/scutar"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.40", features = ["full"] }
+async-trait = "0.1"
+async-stream = "0.3"
+futures = "0.3"
+bytes = "1.7"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+
+# Errors / logging
+thiserror = "1.0"
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Hashing / chunking / crypto (engine layer)
+blake3 = "1.5"
+fastcdc = "3.1"
+aes-gcm = "0.10"
+argon2 = "0.5"
+rand = "0.8"
+zeroize = "1.8"
+base64 = "0.22"
+
+# Filesystem walking + globbing (engine layer)
+walkdir = "2.5"
+globset = "0.4"
+time = { version = "0.3", features = ["formatting", "macros", "serde-well-known"] }
+
+# Cloud SDKs (used only inside scutar-backends; isolated by trait)
+aws-config = { version = "1.5", features = ["behavior-version-latest"] }
+aws-sdk-s3 = "1.51"
+azure_core = "0.21"
+azure_identity = "0.21"
+azure_storage = "0.21"
+azure_storage_blobs = "0.21"
+google-cloud-storage = "0.22"
+russh = "0.45"
+russh-sftp = "2.0"
+
+# Internal crates
+scutar-core = { path = "crates/scutar-core" }
+scutar-backends = { path = "crates/scutar-backends" }
+scutar-engine = { path = "crates/scutar-engine" }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true

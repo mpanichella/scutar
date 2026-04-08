@@ -1,0 +1,43 @@
+# Paso 6: ScutarBackup — la unidad declarativa de backup.
+#
+# Este YAML define un backup snapshot one-shot (sin schedule) de /data del
+# PVC `app-data` hacia el bucket configurado en `prod-s3`, encriptado con el
+# password del paso 5.
+#
+# Apenas lo apliques, el operador:
+#   1. Valida el CR + el ScutarConnection referenciado.
+#   2. Genera el BackupSpec (YAML que va a leer el engine).
+#   3. Crea un ConfigMap `scutar-spec-walkthrough-snapshot`.
+#   4. Crea un Job `scutar-walkthrough-snapshot` con el Pod del engine.
+#
+# Cuando el Job termine, el bucket va a tener:
+#   <BUCKET>/walkthrough/config.json
+#   <BUCKET>/walkthrough/data/<hex>.pack
+#   <BUCKET>/walkthrough/index/<hex>.json
+#   <BUCKET>/walkthrough/snapshots/<timestamp>-<short>.json
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarBackup
+metadata:
+  name: walkthrough-snapshot
+  namespace: scutar
+spec:
+  mode: snapshot
+  # sin schedule => one-shot Job inmediato
+  source:
+    pvcName: app-data
+    path: /data
+  destinationConnectionRef:
+    name: prod-s3
+  destinationPath: walkthrough/
+  encryption:
+    enabled: true
+    passwordSecretRef:
+      name: walkthrough-backup-password
+      key: password
+  retention:
+    keepLast: 5
+  jobTemplate:
+    backoffLimit: 0
+    activeDeadlineSeconds: 1800
+    ttlSecondsAfterFinished: 86400

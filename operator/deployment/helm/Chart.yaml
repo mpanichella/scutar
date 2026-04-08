@@ -1,0 +1,13 @@
+apiVersion: v2
+name: scutar-operator
+description: Scutar — Kubernetes operator for backups and sync (Rust engine)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/addlayer/scutar
+keywords:
+  - backup
+  - sync
+  - kubernetes
+  - operator
+  - storage

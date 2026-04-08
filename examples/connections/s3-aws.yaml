@@ -1,0 +1,35 @@
+# Conexión a Amazon S3 (cuenta real de AWS).
+#
+# Reemplazar:
+#   - <BUCKET>      bucket existente al que el engine va a escribir
+#   - <REGION>      región AWS del bucket (ej. us-east-1, sa-east-1)
+#   - <ACCESS_KEY>  AWS_ACCESS_KEY_ID con permisos s3:Put/Get/List/Delete sobre el bucket
+#   - <SECRET_KEY>  AWS_SECRET_ACCESS_KEY
+#
+# Permiso mínimo recomendado (IAM policy):
+#   - s3:ListBucket  sobre arn:aws:s3:::<BUCKET>
+#   - s3:GetObject, s3:PutObject, s3:DeleteObject  sobre arn:aws:s3:::<BUCKET>/*
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: prod-s3-creds
+  namespace: scutar
+type: Opaque
+stringData:
+  AWS_ACCESS_KEY_ID: "<ACCESS_KEY>"
+  AWS_SECRET_ACCESS_KEY: "<SECRET_KEY>"
+  # AWS_SESSION_TOKEN: ""  # solo si usás credenciales temporales (STS)
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarConnection
+metadata:
+  name: prod-s3
+  namespace: scutar
+spec:
+  type: s3
+  s3:
+    bucket: <BUCKET>
+    region: <REGION>
+  credentialsSecretRef:
+    name: prod-s3-creds

@@ -1,0 +1,27 @@
+# Backup snapshot con el schedule SUSPENDIDO.
+#
+# `spec.suspend: true` le dice al CronJob que no lance nuevas corridas hasta
+# que vuelva a `false`. La definición y la historia se mantienen — útil para
+# pausar un backup sin perder la configuración.
+#
+# Para forzar una ejecución inmediata pese al suspend, agregar la annotation
+# `scutar.io/run-now: "<timestamp>"` al CR; el operador la consume y crea un
+# Job ad-hoc derivado del template del CronJob.
+---
+apiVersion: scutar.io/v1alpha1
+kind: ScutarBackup
+metadata:
+  name: maintenance-paused
+  namespace: scutar
+spec:
+  mode: snapshot
+  schedule: "0 3 * * *"
+  suspend: true                       # ← pausado
+  source:
+    pvcName: app-data
+    path: /data
+  destinationConnectionRef:
+    name: prod-s3
+  destinationPath: maintenance/
+  retention:
+    keepLast: 5

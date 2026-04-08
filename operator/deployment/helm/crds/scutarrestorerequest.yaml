@@ -1,0 +1,52 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: scutarrestorerequests.scutar.io
+spec:
+  group: scutar.io
+  scope: Namespaced
+  names:
+    kind: ScutarRestoreRequest
+    listKind: ScutarRestoreRequestList
+    plural: scutarrestorerequests
+    singular: scutarrestorerequest
+    shortNames: ["srr"]
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      schema:
+        openAPIV3Schema:
+          type: object
+          required: ["spec"]
+          properties:
+            spec:
+              type: object
+              required: ["snapshotRef", "targetPvcName"]
+              properties:
+                snapshotRef:
+                  type: object
+                  required: ["name"]
+                  properties:
+                    name: { type: string }
+                targetPvcName: { type: string }
+                targetPath:    { type: string }
+            status:
+              type: object
+              properties:
+                condition:
+                  type: string
+                  enum: ["Pending", "Running", "Completed", "Failed"]
+                message: { type: string }
+      additionalPrinterColumns:
+        - name: Snapshot
+          type: string
+          jsonPath: .spec.snapshotRef.name
+        - name: PVC
+          type: string
+          jsonPath: .spec.targetPvcName
+        - name: Status
+          type: string
+          jsonPath: .status.condition
